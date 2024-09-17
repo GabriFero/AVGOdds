@@ -22,13 +22,17 @@ headers = {
 }
 
 
-data = get_match(headers)
+football = get_matchF(headers)
+basket = get_matchB(headers)
 
-if data:
-    num_started_events, started_events_ids = process_match(data)
-    
-    print(f"Numero di eventi STARTED: {num_started_events}")
-    print("ID degli eventi STARTED:", started_events_ids)
+if football and basket:
+    Fmatch = process_matchF(football)
+    Fmatch = len(Fmatch)
+    Bmatch = process_matchB(basket)
+    Bmatch = len(Bmatch)
 
+    print(f'NUMERO EVENTI CALCIO: {Fmatch}')
+    print(f'NUMERO EVENTI BASKET: {Bmatch}')
+        
 
 

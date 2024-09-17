@@ -18,13 +18,12 @@ tot_football_match = 'https://eu-offering-api.kambicdn.com/offering/v2018/888it/
 
 
 
-def get_match(headers):
+def get_matchF(headers):
     response = clt.get(url=tot_football_match, headers=headers)
     
     if response.status_code == 200:
         
         data = response.json()
-        print(data)
         with open(f"{os.getcwd()}\\API\\888\\M888.json", "w", encoding="utf-8") as file:
             json.dump(data, file, indent=4)  
         return data
@@ -33,16 +32,14 @@ def get_match(headers):
         return None
 
 
-def process_match(data):
-    started_events = []
+def process_matchF(data):
+    football = []
 
     for event_item in data['events']:
         if event_item['event']['state'] == 'STARTED':
-            started_events.append(event_item['event']['id'])  # Aggiungi l'ID dell'evento
-
-    num_started_events = len(started_events)
+            football.append(event_item['event']['id'])  
     
-    return num_started_events, started_events
+    return football
 
 
 
