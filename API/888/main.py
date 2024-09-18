@@ -24,15 +24,23 @@ headers = {
 
 football = get_matchF(headers)
 basket = get_matchB(headers)
+tennis = get_matchT(headers)
+pingpong = get_matchP(headers)
 
 if football and basket:
     Fmatch = process_matchF(football)
     Fmatch = len(Fmatch)
     Bmatch = process_matchB(basket)
     Bmatch = len(Bmatch)
+    Tmatch = process_matchT(tennis)
+    Tmatch = len(Tmatch)
+    Pmatch = process_matchP(pingpong)
+    Pmatch = len(Pmatch)
 
     print(f'NUMERO EVENTI CALCIO: {Fmatch}')
     print(f'NUMERO EVENTI BASKET: {Bmatch}')
+    print(f'NUMERO EVENTI TENNIS: {Tmatch}')
+    print(f'NUMERO EVENTI PINGPONG: {Pmatch}')
         
 
 

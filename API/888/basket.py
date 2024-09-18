@@ -23,9 +23,7 @@ def get_matchB(headers):
     
     if response.status_code == 200:
         
-        data = response.json()
-        with open(f"{os.getcwd()}\\API\\888\\M888.json", "w", encoding="utf-8") as file:
-            json.dump(data, file, indent=4)  
+        data = response.json()  
         return data
     else:
         print(f"Errore nella richiesta: {response.status_code}")
