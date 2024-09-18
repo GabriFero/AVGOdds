@@ -18,11 +18,13 @@ headers = {
     "sec-fetch-dest": "empty",
     "sec-fetch-mode": "cors",
     "sec-fetch-site": "cross-site",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/128.0.0.0"
 }
 
 def main():
     while True:
+        cycle_start_time = time.time()
+
         football = get_matchF(headers)
         basket = get_matchB(headers)
         tennis = get_matchT(headers)
@@ -30,25 +32,44 @@ def main():
 
         if football and basket:
             Fmatch = process_matchF(football)
-            Fmatch = len(Fmatch)
+            Fmatchlen = len(Fmatch)
             Bmatch = process_matchB(basket)
             Bmatchlen = len(Bmatch)
             Tmatch = process_matchT(tennis)
-            Tmatch = len(Tmatch)
+            Tmatchlen = len(Tmatch)
             Pmatch = process_matchP(pingpong)
-            Pmatch = len(Pmatch)
+            Pmatchlen = len(Pmatch)
 
-            print(f'NUMERO EVENTI CALCIO: {Fmatch}')
+            print(f'NUMERO EVENTI CALCIO: {Fmatchlen}')
             print(f'NUMERO EVENTI BASKET: {Bmatchlen}')
-            print(f'NUMERO EVENTI TENNIS: {Tmatch}')
-            print(f'NUMERO EVENTI PINGPONG: {Pmatch}')
+            print(f'NUMERO EVENTI TENNIS: {Tmatchlen}')
+            print(f'NUMERO EVENTI PINGPONG: {Pmatchlen}')
+            
+            print(f'\nID FOOTBALL: {Fmatch}')
+            print(f'ID BASKET: {Bmatch}')
+            print(f'ID TENNIS: {Tmatch}')
+            print(f'ID PINGPONG: {Pmatch}')
 
-            print(f'\nID BASKET: {Bmatch}')
 
-            Bodds = get_odds(Bmatch, headers)
-            with open(f"{os.getcwd()}\\API\\888\\extracted_odds.json", "w", encoding="utf-8") as file:
+            Fodds = get_oddsF(Fmatch, headers)
+            with open(f"{os.getcwd()}\\API\\888\\FOODS.json", "w", encoding="utf-8") as file:
+                    json.dump(Fodds, file, indent=4)
+
+            Bodds = get_oddsB(Bmatch, headers)
+            with open(f"{os.getcwd()}\\API\\888\\BOODS.json", "w", encoding="utf-8") as file:
                     json.dump(Bodds, file, indent=4)
-            time.sleep(2)
+
+            Todds = get_oddsT(Tmatch, headers)
+            with open(f"{os.getcwd()}\\API\\888\\TOODS.json", "w", encoding="utf-8") as file:
+                    json.dump(Todds, file, indent=4)
+
+            Podds = get_oddsP(Pmatch, headers)
+            with open(f"{os.getcwd()}\\API\\888\\POODS.json", "w", encoding="utf-8") as file:
+                    json.dump(Podds, file, indent=4)
+
+        cycle_end_time = time.time()
+        cycle_duration = cycle_end_time - cycle_start_time
+        print(f"TEMPO ESECUZIONE CICLO: {cycle_duration:.2f} secondi")
         
 
 if __name__ == "__main__":

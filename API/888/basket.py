@@ -42,12 +42,12 @@ def process_matchB(data):
 
 
 # Funzione per ottenere le quote per ciascun ID di evento
-def get_odds(basket_ids, headers):
+def get_oddsB(ids, headers):
     all_extracted_odds = {} 
 
-    for basket_id in basket_ids:
+    for Id in ids :
         try:
-            url = f'https://eu-offering-api.kambicdn.com/offering/v2018/888it/betoffer/event/{basket_id}.json?lang=it_IT&market=IT'
+            url = f'https://eu-offering-api.kambicdn.com/offering/v2018/888it/betoffer/event/{Id}.json?lang=it_IT&market=IT'
             
             response = clt.get(url=url, headers=headers)
             
@@ -60,20 +60,22 @@ def get_odds(basket_ids, headers):
                         criterion_label = offer['criterion']['label']  
                         
                         for outcome in offer['outcomes']:
-                            extracted_odds.append({
-                                'bet_offer_id': offer['id'],                     # ID della scommessa
-                                'participant': outcome['label'],                 # Nome del partecipante
-                                'odds_decimal': outcome['odds'],                 # Quote decimale
-                                'criterion_label': criterion_label               # Label del criterio
-                            })
-                
-                
-                all_extracted_odds[basket_id] = extracted_odds
+                            if 'odds' in outcome:
+                                extracted_odds.append({
+                                    'bet_offer_id': offer['id'],                     # ID della scommessa
+                                    'participant': outcome['label'],                 # Nome del partecipante
+                                    'odds_decimal': outcome['odds'],                 # Quote decimale
+                                    'criterion_label': criterion_label               # Label del criterio
+                                })
+                            else:
+                                continue
+
+                all_extracted_odds[Id] = extracted_odds
                 
             else:
-                print(f"Errore nella richiesta per evento {basket_id}: {response.status_code}")
+                print(f"Errore nella richiesta per evento {Id}: {response.status_code}")
         
         except Exception as e:
-            print(f"Errore durante l'elaborazione di basket_id {basket_id}: {e}")
+            print(f"Errore durante l'elaborazione di basket_id {Id}: {e}")
     
     return all_extracted_odds
