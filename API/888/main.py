@@ -21,26 +21,36 @@ headers = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
 }
 
+def main():
+    while True:
+        football = get_matchF(headers)
+        basket = get_matchB(headers)
+        tennis = get_matchT(headers)
+        pingpong = get_matchP(headers)
 
-football = get_matchF(headers)
-basket = get_matchB(headers)
-tennis = get_matchT(headers)
-pingpong = get_matchP(headers)
+        if football and basket:
+            Fmatch = process_matchF(football)
+            Fmatch = len(Fmatch)
+            Bmatch = process_matchB(basket)
+            Bmatchlen = len(Bmatch)
+            Tmatch = process_matchT(tennis)
+            Tmatch = len(Tmatch)
+            Pmatch = process_matchP(pingpong)
+            Pmatch = len(Pmatch)
 
-if football and basket:
-    Fmatch = process_matchF(football)
-    Fmatch = len(Fmatch)
-    Bmatch = process_matchB(basket)
-    Bmatch = len(Bmatch)
-    Tmatch = process_matchT(tennis)
-    Tmatch = len(Tmatch)
-    Pmatch = process_matchP(pingpong)
-    Pmatch = len(Pmatch)
+            print(f'NUMERO EVENTI CALCIO: {Fmatch}')
+            print(f'NUMERO EVENTI BASKET: {Bmatchlen}')
+            print(f'NUMERO EVENTI TENNIS: {Tmatch}')
+            print(f'NUMERO EVENTI PINGPONG: {Pmatch}')
 
-    print(f'NUMERO EVENTI CALCIO: {Fmatch}')
-    print(f'NUMERO EVENTI BASKET: {Bmatch}')
-    print(f'NUMERO EVENTI TENNIS: {Tmatch}')
-    print(f'NUMERO EVENTI PINGPONG: {Pmatch}')
+            print(f'\nID BASKET: {Bmatch}')
+
+            Bodds = get_odds(Bmatch, headers)
+            with open(f"{os.getcwd()}\\API\\888\\extracted_odds.json", "w", encoding="utf-8") as file:
+                    json.dump(Bodds, file, indent=4)
+            time.sleep(2)
         
 
-
+if __name__ == "__main__":
+    main()
+    
