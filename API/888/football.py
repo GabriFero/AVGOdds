@@ -4,6 +4,9 @@ import numpy as np
 import json
 import time
 import os
+import ujson
+import aiohttp
+import asyncio
 
 clt = httpx.Client(http2=True)
 
@@ -41,42 +44,48 @@ def process_matchF(data):
 
 
 # Funzione per ottenere le quote per ciascun ID di evento
-def get_oddsF(ids, headers):
-    all_extracted_odds = {} 
-
-    for Id in ids :
-        try:
-            url = f'https://eu-offering-api.kambicdn.com/offering/v2018/888it/betoffer/event/{Id}.json?lang=it_IT&market=IT'
-            
-            response = clt.get(url=url, headers=headers)
-            
-            if response.status_code == 200:
-                odds_data = response.json()          
+async def fetch_oddsF(session, Id, headers):
+    try:
+        url = f'https://eu-offering-api.kambicdn.com/offering/v2018/888it/betoffer/event/{Id}.json?lang=it_IT&market=IT'
+        async with session.get(url, headers=headers) as response:
+            if response.status == 200:
+                odds_data = await response.json()
                 extracted_odds = []
                 
                 if 'betOffers' in odds_data:
                     for offer in odds_data['betOffers']:
-                        criterion_label = offer['criterion']['label']  
+                        criterion_label = offer['criterion']['label']
                         
                         for outcome in offer['outcomes']:
                             if 'odds' in outcome:
                                 extracted_odds.append({
-                                    'bet_offer_id': offer['id'],                     # ID della scommessa
-                                    'participant': outcome['label'],                 # Nome del partecipante
-                                    'odds_decimal': outcome['odds'],                 # Quote decimale
-                                    'criterion_label': criterion_label               # Label del criterio
+                                    'bet_offer_id': offer['id'],  # ID della scommessa
+                                    'participant': outcome['label'],  # Nome del partecipante
+                                    'odds_decimal': outcome['odds'],  # Quote decimale
+                                    'criterion_label': criterion_label  # Label del criterio
                                 })
-                            else:
-                                continue
-
-                all_extracted_odds[Id] = extracted_odds
-                
+                return Id, extracted_odds
             else:
-                print(f"Errore nella richiesta per evento {Id}: {response.status_code}")
-        
-        except Exception as e:
-            print(f"Errore durante l'elaborazione di basket_id {Id}: {e}")
-    
+                print(f"Errore nella richiesta per evento {Id}: {response.status}")
+                return Id, []
+
+    except Exception as e:
+        print(f"Errore durante l'elaborazione di basket_id {Id}: {e}")
+        return Id, []
+
+# Funzione principale asincrona per gestire tutte le richieste
+async def get_oddsF(ids, headers):
+    all_extracted_odds = {}
+
+    # Creare una sessione aiohttp per le richieste
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_oddsF(session, Id, headers) for Id in ids]  # Creare un task per ogni richiesta
+        results = await asyncio.gather(*tasks)  # Eseguire tutte le richieste in parallelo
+
+        # Popolare il dizionario con i risultati
+        for Id, extracted_odds in results:
+            all_extracted_odds[Id] = extracted_odds
+
     return all_extracted_odds
 
 

@@ -1,10 +1,12 @@
-import json
+import orjson
 import time
 from football import *
 from basket import *
 from pingpong import *
 from tennis import *
-
+import ujson
+import asyncio
+import aiohttp
 
 headers = {
     "accept": "application/json, text/javascript, */*; q=0.01",
@@ -21,15 +23,17 @@ headers = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/128.0.0.0"
 }
 
-def main():
+async def main():
     while True:
         cycle_start_time = time.time()
 
+        # Ottieni i match in modo sincrono
         football = get_matchF(headers)
         basket = get_matchB(headers)
         tennis = get_matchT(headers)
         pingpong = get_matchP(headers)
 
+        # Processa i match se disponibili
         if football and basket:
             Fmatch = process_matchF(football)
             Fmatchlen = len(Fmatch)
@@ -50,28 +54,35 @@ def main():
             print(f'ID TENNIS: {Tmatch}')
             print(f'ID PINGPONG: {Pmatch}')
 
+            # Esegui tutte le chiamate get_oddsF, get_oddsB, get_oddsT, get_oddsP in parallelo
+            Fodds, Bodds, Todds, Podds = await asyncio.gather(
+                get_oddsF(Fmatch, headers),
+                get_oddsB(Bmatch, headers),
+                get_oddsT(Tmatch, headers),
+                get_oddsP(Pmatch, headers)
+            )
 
-            Fodds = get_oddsF(Fmatch, headers)
+            # Salva i risultati nei file JSON usando ujson
             with open(f"{os.getcwd()}\\API\\888\\FOODS.json", "w", encoding="utf-8") as file:
-                    json.dump(Fodds, file, indent=4)
+                file.write(ujson.dumps(Fodds, indent=4))
 
-            Bodds = get_oddsB(Bmatch, headers)
             with open(f"{os.getcwd()}\\API\\888\\BOODS.json", "w", encoding="utf-8") as file:
-                    json.dump(Bodds, file, indent=4)
+                file.write(ujson.dumps(Bodds, indent=4))
 
-            Todds = get_oddsT(Tmatch, headers)
             with open(f"{os.getcwd()}\\API\\888\\TOODS.json", "w", encoding="utf-8") as file:
-                    json.dump(Todds, file, indent=4)
+                file.write(ujson.dumps(Todds, indent=4))
 
-            Podds = get_oddsP(Pmatch, headers)
             with open(f"{os.getcwd()}\\API\\888\\POODS.json", "w", encoding="utf-8") as file:
-                    json.dump(Podds, file, indent=4)
+                file.write(ujson.dumps(Podds, indent=4))
 
+        # Calcola il tempo di esecuzione del ciclo
         cycle_end_time = time.time()
         cycle_duration = cycle_end_time - cycle_start_time
         print(f"TEMPO ESECUZIONE CICLO: {cycle_duration:.2f} secondi")
-        
+
+        # Aspetta un po' prima di eseguire di nuovo il ciclo, se necessario
+        await asyncio.sleep(1)  # Attendi 1 secondo prima di ripetere
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
     
