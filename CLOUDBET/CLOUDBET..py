@@ -29,13 +29,18 @@ headers = {
 # Lista di mercati di interesse basati sui params
 params_of_interest = ['handicap', 'total', 'winner', '1x2', 'over', 'under']
 
-# Funzione per effettuare la richiesta e salvare il risultato
+# Funzione per effettuare la richiesta e salvare i dati "processed" e "non-processed"
 def fetch_and_process(sport_name, url):
     try:
         # Richiesta HTTP
         response = httpx.get(url, headers=headers)
         response.raise_for_status()  # Solleva un'eccezione per status code non 2xx
         data = response.json()
+
+        # Salva i dati non processati (raw)
+        raw_file_path = os.path.join(os.getcwd(), "CLOUDBET", f"Raw{sport_name.capitalize()}.json")
+        with open(raw_file_path, "w", encoding="utf-8") as raw_file:
+            json.dump(data, raw_file, indent=4)
 
         # Estrazione dei dati direttamente dalla risposta
         matches = []
@@ -58,12 +63,13 @@ def fetch_and_process(sport_name, url):
                                         'price': selection.get('price', 'N/A')
                                     })
 
-        # Salva i dati estratti in un file JSON
-        file_path = os.path.join(os.getcwd(), "CLOUDBET", f"Processed{sport_name.capitalize()}.json")
-        with open(file_path, "w", encoding="utf-8") as file:
-            json.dump(matches, file, indent=4)
+        # Salva i dati elaborati (processed)
+        processed_file_path = os.path.join(os.getcwd(), "CLOUDBET", f"Processed{sport_name.capitalize()}.json")
+        with open(processed_file_path, "w", encoding="utf-8") as processed_file:
+            json.dump(matches, processed_file, indent=4)
 
-        print(f"Dati elaborati e salvati per {sport_name}")
+        print(f"Dati non processati salvati per {sport_name} in {raw_file_path}")
+        print(f"Dati elaborati e salvati per {sport_name} in {processed_file_path}")
     
     except httpx.HTTPStatusError as e:
         print(f"Errore HTTP per {sport_name}: {e.response.status_code}")
